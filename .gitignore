@@ -1,0 +1,22 @@
+# Files and folders to be ignored by Git
+
+# Node.js dependencies and packages
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Automatically generated files
+*.log
+*.lock
+*.log.*
+
+# IDE/editor configuration files
+.vscode/
+.idea/
+
+# System-specific configuration files
+.DS_Store
+Thumbs.db
+
+# Project-specific configuration (adjust as needed)
+config.json
