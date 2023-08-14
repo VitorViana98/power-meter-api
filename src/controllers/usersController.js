@@ -1,4 +1,5 @@
-const db = require("../services/dbService");
+const db = require("../services/dbService").promise();
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const createUser = async (req, res) => {
@@ -9,29 +10,55 @@ const createUser = async (req, res) => {
     const salt = await bcrypt.genSalt(saltRounds);
 
     const passwordHash = await bcrypt.hash(password, salt);
-    console.log("aqui salt", salt, password, passwordHash);
 
     const query =
       "INSERT INTO tb_users (login, user_name, email, password_hash, salt) VALUES (?, ?, ?, ?, ?)";
 
-    db.query(
-      query,
-      [login, user_name, email, passwordHash, salt],
-      (err, results) => {
-        if (err) {
-          console.error("Error creating user:", err);
-          res.status(500).json({ error: "Error creating user" });
-        } else {
-          res.status(201).json({ message: "User created with success" });
-        }
-      }
-    );
+    const [results] = await db.query(query, [
+      login,
+      user_name,
+      email,
+      passwordHash,
+      salt,
+    ]);
+
+    res.status(201).json({ message: "User created with success" });
   } catch (error) {
-    console.error("Error creating user::", error);
-    res.status(500).json({ error: "Error creating user:" });
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: "Error creating user:", msg: error });
+  }
+};
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Busca o usuário pelo email
+    const query = "SELECT * FROM power_metter.tb_users WHERE email = ?";
+    const [user] = await db.query(query, [email]);
+
+    // Verifica se o usuário existe e a senha está correta
+    if (!user || !bcrypt.compareSync(password, user[0].password_hash)) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Credenciais inválidas" });
+    }
+
+    // Gera um token de autenticação
+    const token = jwt.sign({ userId: user.user_id }, "PowerMetter", {
+      expiresIn: "1h",
+    });
+
+    return res.json({ success: true, token });
+  } catch (error) {
+    console.error("Erro no login:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Erro no servidor" });
   }
 };
 
 module.exports = {
   createUser,
+  login,
 };
