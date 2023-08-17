@@ -1,5 +1,5 @@
 const db = require("../services/dbService");
-const { ok, serverError } = require('../helpers/http_response_helper');
+const { ok, serverError } = require("../helpers/http_response_helper");
 
 const live = (_, res) => ok(res, { message: "Our App is Up and Running." });
 
@@ -15,7 +15,8 @@ const ready = async (_, res) => {
         );
       } else {
         console.debug("Reading Connection is: [", results[0].status, "]");
-        return res.status(201).json({ message: `Reading Connection is: ${results[0].status}` });
+
+        return ok(res, `Reading Connection is: ${results[0].status}`);
       }
     });
   } catch (error) {

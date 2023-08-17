@@ -38,18 +38,23 @@ const login = async (req, res) => {
     const [user] = await db.query(query, [email]);
 
     // Verifica se o usuário existe e a senha está correta
-    if (!user || !bcrypt.compareSync(password, user[0].password_hash)) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Credenciais inválidas" });
+    if (
+      !user ||
+      user?.length === 0 ||
+      !bcrypt.compareSync(password, user[0].password_hash)
+    ) {
+      return res.json({ success: false, message: "Credenciais inválidas" });
     }
 
     // Gera um token de autenticação
-    const token = jwt.sign({ userId: user.user_id }, "PowerMetter", {
+    const token = jwt.sign({ userId: user[0].user_id }, "PowerMetter", {
       expiresIn: "1h",
     });
 
-    return res.json({ success: true, token });
+    delete user[0].password_hash;
+    delete user[0].salt;
+
+    return res.json({ success: true, token, user });
   } catch (error) {
     console.error("Erro no login:", error);
     return res

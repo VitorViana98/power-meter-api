@@ -1,8 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const usersController = require('../controllers/usersController');
+const usersController = require("../controllers/usersController");
+const userCircuitController = require("../controllers/userCircuitController");
 
-router.post('/register', usersController.createUser);
-router.post('/login', usersController.login);
+router.route("/register").post(usersController.createUser);
+
+router.route("/login").post(usersController.login);
+
+router
+  .route("/circuit")
+  // .get(usersController.login)
+  .post(userCircuitController.createCircuit);
 
 module.exports = router;
