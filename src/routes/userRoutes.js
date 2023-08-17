@@ -9,7 +9,7 @@ router.route("/login").post(usersController.login);
 
 router
   .route("/circuit")
-  // .get(usersController.login)
+  .get(userCircuitController.getCircuits)
   .post(userCircuitController.createCircuit);
 
 module.exports = router;
