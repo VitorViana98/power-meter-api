@@ -7,8 +7,8 @@ const {
 const db = require("../services/dbService").promise();
 
 const getCircuits = async (req, res) => {
+  console.log("aqui antes", req.query);
   const { usuario } = req.query;
-
   try {
     const query = "SELECT * FROM tb_circuits where user_id = ?";
 
@@ -57,7 +57,43 @@ const createCircuit = async (req, res) => {
   }
 };
 
+const getDashboard = async (req, res) => {
+  const circuitId = req.params.circuit_id;
+  if (!circuitId) {
+    return requiredField(res, "Invalid params");
+  }
+
+  const query = `
+  SELECT currents.timestamp, currents.current_measurement, voltages.voltage_measurement,
+         (currents.current_measurement * voltages.voltage_measurement) AS power,
+         circuits.circuit_name, circuits.circuit_description
+  FROM currents
+  JOIN voltages ON currents.circuit_id = voltages.circuit_id AND currents.timestamp = voltages.timestamp
+  JOIN tb_circuits AS circuits ON currents.circuit_id = circuits.circuit_id
+  WHERE currents.circuit_id = ?
+  ORDER BY currents.timestamp;
+`;
+
+  try {
+    const [results] = await db.query(query, [circuitId]);
+
+    return res.status(201).json({
+      content: {
+        results,
+        circuit_name: results[0].circuit_name,
+        circuit_description: results[0].circuit_description,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting circuit dashboard:", error);
+    return res
+      .status(500)
+      .json({ error: "Error getting circuit dashboard:", msg: error });
+  }
+};
+
 module.exports = {
   createCircuit,
   getCircuits,
+  getDashboard,
 };

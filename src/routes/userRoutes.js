@@ -12,4 +12,8 @@ router
   .get(userCircuitController.getCircuits)
   .post(userCircuitController.createCircuit);
 
+  router
+  .route("/circuit/:circuit_id/dashboard")
+  .get(userCircuitController.getDashboard)
+
 module.exports = router;
