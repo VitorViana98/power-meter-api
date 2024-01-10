@@ -8,18 +8,19 @@ const healthRoutes = require("./routes/healthRoutes"); // Importe a nova rota
 const app = express();
 
 const corsOptions = {
-    origin: '*', 
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  };
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: false,
+};
 
 app.use(cors(corsOptions));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use((req, _, next) => {
-    console.log(`New request: ${req.method} ${req.originalUrl}`);
-    next();
-  });
+app.use("*", (req, _, next) => {
+  console.log(`New request: ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 app.use("/health", healthRoutes);
 app.use("/power-metter/metter", metterRoutes);

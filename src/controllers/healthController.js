@@ -1,7 +1,9 @@
 const db = require("../services/dbService");
 const { ok, serverError } = require("../helpers/http_response_helper");
 
-const live = (_, res) => ok(res, { message: "Our App is Up and Running." });
+const live = (req, res) => {
+  return ok(res, { message: "Our App is Up and Running." });
+};
 
 const ready = async (_, res) => {
   try {

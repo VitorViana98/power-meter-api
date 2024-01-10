@@ -1,7 +1,15 @@
-const app = require('./app');
+const app = require("./app");
 
-const port = process.env.PORT || 3030;
+const port = process.env.PORT;
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+const ip_address = process.env.IP_ADDRESS;
+// run comando 'ipconfig' at terminal and get the IP address
+// of Wireless LAN adapter Wi-Fi (IPv4 or IPv6)
+
+app.listen(
+  port,
+  ip_address,
+  () => {
+    console.log(`Server running on port ${ip_address}:${port}`);
+  }
+);

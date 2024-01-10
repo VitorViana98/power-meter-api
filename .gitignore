@@ -1,5 +1,7 @@
 # Files and folders to be ignored by Git
 
+.env
+
 # Node.js dependencies and packages
 node_modules/
 npm-debug.log
