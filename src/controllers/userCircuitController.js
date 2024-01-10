@@ -4,15 +4,14 @@ const {
   serverError,
 } = require("../helpers/http_response_helper");
 
-const db = require("../services/dbService").promise();
+const db = require("../services/dbService");
 
 const getCircuits = async (req, res) => {
-  console.log("aqui antes", req.query);
   const { usuario } = req.query;
   try {
-    const query = "SELECT * FROM tb_circuits where user_id = ?";
-
-    const [results] = await db.query(query, [usuario.user_id]);
+    const query = "SELECT * FROM power_metter.tb_circuits where user_id = ?;";
+    console.log('aqui usuario', usuario)
+    const [results] = await db.query(query, [usuario[0].user_id]);
 
     return ok(res, results);
   } catch (error) {
@@ -63,16 +62,30 @@ const getDashboard = async (req, res) => {
     return requiredField(res, "Invalid params");
   }
 
-  const query = `
-  SELECT currents.timestamp, currents.current_measurement, voltages.voltage_measurement,
-         (currents.current_measurement * voltages.voltage_measurement) AS power,
-         circuits.circuit_name, circuits.circuit_description
-  FROM currents
-  JOIN voltages ON currents.circuit_id = voltages.circuit_id AND currents.timestamp = voltages.timestamp
-  JOIN tb_circuits AS circuits ON currents.circuit_id = circuits.circuit_id
-  WHERE currents.circuit_id = ?
-  ORDER BY currents.timestamp;
-`;
+  //   const query = `
+  //   SELECT currents.timestamp, currents.current_measurement, voltages.voltage_measurement,
+  //          (currents.current_measurement * voltages.voltage_measurement) AS power,
+  //          circuits.circuit_name, circuits.circuit_description
+  //   FROM power_metter.currents
+  //   LEFT JOIN power_metter.voltages ON currents.circuit_id = voltages.circuit_id AND currents.timestamp = voltages.timestamp
+  //   LEFT JOIN power_metter.tb_circuits AS circuits ON currents.circuit_id = circuits.circuit_id
+  //   WHERE currents.circuit_id = ?
+  //   ORDER BY currents.timestamp DESC;
+  // `;
+
+  const query = `SELECT timestamp, current_measurement, voltage_measurement, power, circuit_name, circuit_description
+  FROM (
+    SELECT currents.timestamp, currents.current_measurement, voltages.voltage_measurement,
+           (currents.current_measurement * voltages.voltage_measurement) AS power,
+           circuits.circuit_name, circuits.circuit_description
+    FROM power_metter.currents
+    LEFT JOIN power_metter.voltages ON currents.circuit_id = voltages.circuit_id AND currents.timestamp = voltages.timestamp
+    LEFT JOIN power_metter.tb_circuits AS circuits ON currents.circuit_id = circuits.circuit_id
+    WHERE currents.circuit_id = ?
+    ORDER BY currents.timestamp DESC
+    LIMIT 5000
+  ) AS subquery
+  ORDER BY timestamp ASC;`;
 
   try {
     const [results] = await db.query(query, [circuitId]);

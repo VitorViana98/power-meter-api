@@ -2,8 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const metterRoutes = require("./routes/metterRoutes");
-const userRoutes = require("./routes/userRoutes"); // Importe a nova rota
-const healthRoutes = require("./routes/healthRoutes"); // Importe a nova rota
+const userRoutes = require("./routes/userRoutes");
+const healthRoutes = require("./routes/healthRoutes");
 
 const app = express();
 

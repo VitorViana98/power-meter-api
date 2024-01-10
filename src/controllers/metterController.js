@@ -1,20 +1,41 @@
+const { ok, badRequest } = require("../helpers/http_response_helper");
 const db = require("../services/dbService");
 
-const addNewMeasurement = (req, res) => {
-  const { userId, circuitId, voltage, current } = req.body;
+const addNewMeasurement = async (req, res) => {
+  try {
+    const {
+      circuitId = 8,
+      current,
+      millis,
+      timestamp,
+    } = req.body;
 
-  const query =
-    "INSERT INTO medicoes (user_id, circuit_id, voltage, current) VALUES (?, ?, ?, ?)";
-  db.query(query, [userId, circuitId, voltage, current], (err, results) => {
-    if (err) {
-      console.error("Erro ao inserir medição no banco de dados:", err);
-      res
-        .status(500)
-        .json({ error: "Erro ao inserir medição no banco de dados" });
-    } else {
-      res.status(201).json({ message: "Medição inserida com sucesso" });
+    if (!current || !millis || !timestamp) {
+      return badRequest(res, { message: "Invalid measurement data" });
     }
-  });
+
+    if (
+      !(current.length === millis.length && millis.length === timestamp.length)
+    ) {
+      return badRequest(res, { message: "Arrays must have the same length" });
+    }
+
+    const query =
+      "INSERT INTO power_metter.currents (circuit_id, current_measurement, timestamp, millis) VALUES ?;";
+
+    const values = current.map((_, index) => [
+      circuitId,
+      current[index],
+      timestamp[index],
+      millis[index],
+    ]);
+
+    const [results] = await db.query(query, [values]);
+
+    return ok(res, { message: "Values send to backend" });
+  } catch (error) {
+    return badRequest(res, { message: "Values send to backend", error });
+  }
 };
 
 module.exports = {

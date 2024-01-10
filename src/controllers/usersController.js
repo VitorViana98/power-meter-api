@@ -1,4 +1,4 @@
-const db = require("../services/dbService").promise();
+const db = require("../services/dbService");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
