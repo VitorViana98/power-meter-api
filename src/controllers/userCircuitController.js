@@ -51,12 +51,15 @@ const getDashboard = async (req, res) => {
     return requiredField(res, "Invalid params");
   }
 
-  const query = `SELECT currents.timestamp, currents.current_measurement, circuits.circuit_name, circuits.circuit_description
+  const query = `SELECT * FROM (
+    SELECT currents.timestamp, currents.current_measurement, circuits.circuit_name, circuits.circuit_description
     FROM power_metter.currents
     LEFT JOIN power_metter.tb_circuits AS circuits ON currents.circuit_id = circuits.circuit_id
     WHERE currents.circuit_id = ?
-    ORDER BY currents.timestamp ASC
-  LIMIT 5000;`;
+    ORDER BY currents.timestamp DESC
+    LIMIT 2000
+  ) AS subquery
+  ORDER BY subquery.timestamp ASC;`;
 
   try {
     const [results] = await db.query(query, [circuitId]);
